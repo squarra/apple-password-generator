@@ -1,0 +1,1 @@
+Generate passwords like the Apple password generator with configurable blocks, numbers, and uppercase letters.
