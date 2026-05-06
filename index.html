@@ -1,358 +1,419 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Apple-Style Password Generator</title>
+        <meta name="description" content="Generate passwords like the Apple password generator." />
 
-<head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Apple-Style Password Generator</title>
-    <meta name="description" content="Generate passwords like the Apple password generator." />
+        <style>
+            :root {
+                color-scheme: dark;
+                --bg: #181a1f;
+                --panel: #22252c;
+                --panel-2: #2a2e36;
+                --border: #3a404c;
+                --text: #eef2f7;
+                --muted: #a7b0bf;
+                --accent: #8ab4ff;
+                --accent-hover: #a4c2ff;
+                --success: #7dd3a0;
+            }
 
-    <style>
-        :root {
-            color-scheme: dark;
-            --bg: #181a1f;
-            --panel: #22252c;
-            --panel-2: #2a2e36;
-            --border: #3a404c;
-            --text: #eef2f7;
-            --muted: #a7b0bf;
-            --accent: #8ab4ff;
-            --accent-hover: #a4c2ff;
-            --success: #7dd3a0;
-        }
+            * {
+                box-sizing: border-box;
+            }
 
-        * {
-            box-sizing: border-box;
-        }
+            html,
+            body {
+                margin: 0;
+                font-family: system-ui;
+                background: var(--bg);
+                color: var(--text);
+            }
 
-        html,
-        body {
-            margin: 0;
-            font-family: system-ui;
-            background: var(--bg);
-            color: var(--text);
-        }
+            body {
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 12px;
+            }
 
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-        }
+            main {
+                width: 90%;
+                max-width: 480px;
+                background: var(--panel);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+                padding: 18px 24px;
+            }
 
-        main {
-            width: 90%;
-            max-width: 640px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-            padding: 18px 24px;
-        }
+            .header {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 20px;
+            }
 
-        .header {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
+            h1 {
+                margin: 0;
+                font-size: 1.25rem;
+                font-weight: bold;
+            }
 
-        h1 {
-            margin: 0;
-            font-size: 1.25rem;
-            font-weight: bold;
-        }
+            .subtle {
+                margin: 0;
+                color: var(--muted);
+                font-size: 0.95rem;
+            }
 
-        .subtle {
-            margin: 0;
-            color: var(--muted);
-            font-size: 0.95rem;
-        }
+            details.options {
+                margin-bottom: 16px;
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                background: var(--panel-2);
+            }
 
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px;
-            margin-bottom: 16px;
-        }
+            details.options summary {
+                cursor: pointer;
+                padding: 10px 14px;
+                font-size: 0.9rem;
+                color: var(--muted);
+                list-style: none;
+                user-select: none;
+            }
 
-        .field {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
+            details.options summary::-webkit-details-marker {
+                display: none;
+            }
 
-        .field label {
-            font-size: 0.9rem;
-            color: var(--muted);
-        }
+            details.options summary::before {
+                content: "▸";
+                display: inline-block;
+                margin-right: 8px;
+                transition: transform 0.15s ease;
+            }
 
-        .field input {
-            width: 100%;
-            background: var(--panel-2);
-            color: var(--text);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 10px 12px;
-            font: inherit;
-            outline: none;
-        }
+            details.options[open] summary::before {
+                transform: rotate(90deg);
+            }
 
-        .field input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(138, 180, 255, 0.15);
-        }
+            details.options summary:hover {
+                color: var(--text);
+            }
 
-        .actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 18px;
-        }
+            .options > div {
+                padding: 0 14px 14px;
+            }
 
-        button {
-            border: 1px solid var(--border);
-            background: var(--panel-2);
-            color: var(--text);
-            border-radius: 10px;
-            padding: 10px 14px;
-            font: inherit;
-            cursor: pointer;
-        }
+            .controls {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 12px;
+            }
 
-        button:hover {
-            background: #323742;
-            border-color: #4a5160;
-        }
+            .field {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
 
-        button:active {
-            transform: translateY(1px);
-        }
+            .field label {
+                font-size: 0.9rem;
+                color: var(--muted);
+            }
 
-        .primary {
-            background: var(--accent);
-            color: #111827;
-            border-color: transparent;
-            font-weight: 600;
-        }
+            .field input {
+                width: 100%;
+                background: var(--panel);
+                color: var(--text);
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 10px 12px;
+                font: inherit;
+                outline: none;
+            }
 
-        .primary:hover {
-            background: var(--accent-hover);
-        }
+            .field input:focus {
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(138, 180, 255, 0.15);
+            }
 
-        .password-card {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: var(--panel-2);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 10px 14px;
-        }
+            button {
+                border: 1px solid var(--border);
+                background: var(--panel-2);
+                color: var(--text);
+                border-radius: 10px;
+                padding: 10px 14px;
+                font: inherit;
+                cursor: pointer;
+            }
 
-        .password {
-            width: 100%;
-            text-align: left;
-            border: none;
-            border-radius: 8px;
-            color: var(--text);
-            padding: 6px 0 0;
-            font-size: 1.1rem;
-            font-family: monospace;
-        }
+            button:hover {
+                background: #323742;
+                border-color: #4a5160;
+            }
 
-        .password:hover {
-            color: #ffffff;
-        }
+            button:active {
+                transform: translateY(1px);
+            }
 
-        .password:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 4px;
-        }
+            .primary {
+                background: var(--accent);
+                color: #111827;
+                border-color: transparent;
+                font-weight: 600;
+                margin-bottom: 18px;
+            }
 
-        .copy-status {
-            min-height: 1.25rem;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: var(--muted);
-        }
+            .primary:hover {
+                background: var(--accent-hover);
+            }
 
-        .copy-status.success {
-            color: var(--success);
-        }
+            .password-card {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                background: var(--panel-2);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 10px 14px;
+            }
 
-        footer a {
-            font-size: 0.85rem;
-            color: var(--muted);
-            text-decoration: none;
-            border-bottom: 1px dotted var(--muted);
-        }
+            .password-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                background: transparent;
+                border: none;
+                padding: 0;
+                cursor: pointer;
+                color: var(--muted);
+                text-align: left;
+            }
 
-        footer a:hover {
-            color: var(--text);
-            border-bottom-color: var(--text);
-        }
-    </style>
-</head>
+            .password-row:hover {
+                color: var(--text);
+            }
 
-<body>
-    <main>
-        <div class="header">
-            <h1>Apple-Style Password Generator</h1>
-            <p class="subtle">
-                Generate passwords like the Apple password generator.
-            </p>
-        </div>
+            .password-row:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: 4px;
+                border-radius: 6px;
+            }
 
-        <div class="controls">
-            <div class="field">
-                <label for="blocks">Blocks</label>
-                <input type="number" id="blocks" value="3" min="1" max="6" />
+            .password {
+                flex: 1;
+                color: var(--text);
+                font-size: 1.1rem;
+                font-family: monospace;
+            }
+
+            .copy-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .copy-icon svg {
+                width: 18px;
+                height: 18px;
+                display: block;
+            }
+
+            .copy-status {
+                min-height: 1.25rem;
+                font-size: 0.9rem;
+                color: var(--muted);
+            }
+
+            .copy-status.success {
+                color: var(--success);
+            }
+
+            footer a {
+                font-size: 0.85rem;
+                color: var(--muted);
+                text-decoration: none;
+                border-bottom: 1px dotted var(--muted);
+            }
+
+            footer a:hover {
+                color: var(--text);
+                border-bottom-color: var(--text);
+            }
+        </style>
+    </head>
+
+    <body>
+        <main>
+            <div class="header">
+                <h1>Apple-Style Password Generator</h1>
+                <p class="subtle">Generate passwords like the Apple password generator.</p>
             </div>
 
-            <div class="field">
-                <label for="digits">Digits</label>
-                <input type="number" id="digits" value="1" min="0" max="24" />
-            </div>
-
-            <div class="field">
-                <label for="uppercase">Uppercase</label>
-                <input type="number" id="uppercase" value="1" min="0" max="24" />
-            </div>
-        </div>
-
-        <div class="actions">
             <button id="generate" class="primary">Generate password</button>
-            <button id="reset" type="button">Reset to defaults</button>
-        </div>
 
-        <div class="password-card">
-            <button id="password" class="password" type="button" aria-label="Copy generated password"></button>
+            <details class="options">
+                <summary>Options</summary>
+                <div class="controls">
+                    <div class="field">
+                        <label for="blocks">Blocks</label>
+                        <input type="number" id="blocks" value="3" min="1" max="6" />
+                    </div>
 
-            <div id="copyStatus" class="copy-status" aria-live="polite">
-                Nothing copied yet.
+                    <div class="field">
+                        <label for="digits">Digits</label>
+                        <input type="number" id="digits" value="1" min="0" max="24" />
+                    </div>
+
+                    <div class="field">
+                        <label for="uppercase">Uppercase</label>
+                        <input type="number" id="uppercase" value="1" min="0" max="24" />
+                    </div>
+                </div>
+                <div>
+                    <button id="reset" type="button">Reset to defaults</button>
+                </div>
+            </details>
+
+            <div class="password-card">
+                <button id="password" class="password-row" type="button" aria-label="Copy generated password">
+                    <span id="passwordText" class="password"></span>
+                    <span class="copy-icon" aria-hidden="true">
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path
+                                fill-rule="evenodd"
+                                d="M4 2a2 2 0 00-2 2v9a2 2 0 002 2h2v2a2 2 0 002 2h9a2 2 0 002-2V8a2 2 0 00-2-2h-2V4a2 2 0 00-2-2H4zm9 4V4H4v9h2V8a2 2 0 012-2h5zM8 8h9v9H8V8z"
+                            />
+                        </svg>
+                    </span>
+                </button>
+
+                <div id="copyStatus" class="copy-status" aria-live="polite">Nothing copied yet.</div>
             </div>
-        </div>
-    </main>
+        </main>
 
-    <footer>
-        <a href="https://github.com/squarra/apple-password-generator">View Source</a>
-    </footer>
+        <footer>
+            <a href="https://github.com/squarra/apple-password-generator">View Source</a>
+        </footer>
 
-    <script>
-        const DEFAULTS = {
-            blocks: 3,
-            digits: 1,
-            uppercase: 1,
-        };
+        <script>
+            const DEFAULTS = {
+                blocks: 3,
+                digits: 1,
+                uppercase: 1,
+            };
 
-        const vowels = "aeiou";
-        const consonants = "bcdfghjklmnpqrstvwxyz";
-        const pattern = [true, false, true, true, false, true];
+            const vowels = "aeiou";
+            const consonants = "bcdfghjklmnpqrstvwxyz";
+            const pattern = [true, false, true, true, false, true];
 
-        const inputs = {
-            blocks: document.getElementById("blocks"),
-            digits: document.getElementById("digits"),
-            uppercase: document.getElementById("uppercase"),
-        };
+            const inputs = {
+                blocks: document.getElementById("blocks"),
+                digits: document.getElementById("digits"),
+                uppercase: document.getElementById("uppercase"),
+            };
 
-        const generateButton = document.getElementById("generate");
-        const resetButton = document.getElementById("reset");
-        const passwordButton = document.getElementById("password");
-        const copyStatus = document.getElementById("copyStatus");
+            const generateButton = document.getElementById("generate");
+            const resetButton = document.getElementById("reset");
+            const passwordButton = document.getElementById("password");
+            const passwordText = document.getElementById("passwordText");
+            const copyStatus = document.getElementById("copyStatus");
 
-        const pick = (str) => str[Math.floor(Math.random() * str.length)];
+            const pick = (str) => str[Math.floor(Math.random() * str.length)];
 
-        function shuffle(array) {
-            const copy = [...array];
-            for (let i = copy.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [copy[i], copy[j]] = [copy[j], copy[i]];
-            }
-            return copy;
-        }
-
-        const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-        const readNumber = (input, fallback) => Number(input.value) || fallback;
-
-        function setStatus(message, success = false) {
-            copyStatus.textContent = message;
-            copyStatus.className = `copy-status${success ? " success" : ""}`;
-        }
-
-        function readSettings() {
-            const blockCount = clamp(readNumber(inputs.blocks, DEFAULTS.blocks), 1, 6);
-            const digitCount = clamp(readNumber(inputs.digits, 0), 0, blockCount * 2);
-            const upperCount = clamp(readNumber(inputs.uppercase, 0), 0, blockCount * 6 - digitCount);
-
-            inputs.blocks.value = blockCount;
-            inputs.digits.value = digitCount;
-            inputs.uppercase.value = upperCount;
-
-            return { blockCount, digitCount, upperCount };
-        }
-
-        function generatePassword() {
-            const { blockCount, digitCount, upperCount } = readSettings();
-            const blocks = [];
-            const digitPositions = [];
-            const allPositions = [];
-
-            for (let b = 0; b < blockCount; b++) {
-                const block = pattern.map((isConsonant, c) => {
-                    allPositions.push([b, c]);
-
-                    if (!isConsonant) return pick(vowels);
-
-                    if (c === 0 || c === 5) digitPositions.push([b, c]);
-                    return pick(consonants);
-                });
-
-                blocks.push(block);
+            function shuffle(array) {
+                const copy = [...array];
+                for (let i = copy.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [copy[i], copy[j]] = [copy[j], copy[i]];
+                }
+                return copy;
             }
 
-            const digitSlots = shuffle(digitPositions).slice(0, digitCount);
+            const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+            const readNumber = (input, fallback) => Number(input.value) || fallback;
 
-            for (const [b, c] of digitSlots) {
-                blocks[b][c] = String(Math.floor(Math.random() * 10));
+            function setStatus(message, success = false) {
+                copyStatus.textContent = message;
+                copyStatus.className = `copy-status${success ? " success" : ""}`;
             }
 
-            const digitSlotSet = new Set(digitSlots.map(([b, c]) => `${b}:${c}`));
-            const uppercaseSlots = shuffle(allPositions.filter(([b, c]) => !digitSlotSet.has(`${b}:${c}`))).slice(0, upperCount);
+            function readSettings() {
+                const blockCount = clamp(readNumber(inputs.blocks, DEFAULTS.blocks), 1, 6);
+                const digitCount = clamp(readNumber(inputs.digits, 0), 0, blockCount * 2);
+                const upperCount = clamp(readNumber(inputs.uppercase, 0), 0, blockCount * 6 - digitCount);
 
-            for (const [b, c] of uppercaseSlots) {
-                blocks[b][c] = blocks[b][c].toUpperCase();
+                inputs.blocks.value = blockCount;
+                inputs.digits.value = digitCount;
+                inputs.uppercase.value = upperCount;
+
+                return { blockCount, digitCount, upperCount };
             }
 
-            return blocks.map((block) => block.join("")).join("-");
-        }
+            function generatePassword() {
+                const { blockCount, digitCount, upperCount } = readSettings();
+                const blocks = [];
+                const digitPositions = [];
+                const allPositions = [];
 
-        function resetDefaults() {
-            for (const [key, value] of Object.entries(DEFAULTS)) {
-                inputs[key].value = value;
+                for (let b = 0; b < blockCount; b++) {
+                    const block = pattern.map((isConsonant, c) => {
+                        allPositions.push([b, c]);
+
+                        if (!isConsonant) return pick(vowels);
+
+                        if (c === 0 || c === 5) digitPositions.push([b, c]);
+                        return pick(consonants);
+                    });
+
+                    blocks.push(block);
+                }
+
+                const digitSlots = shuffle(digitPositions).slice(0, digitCount);
+
+                for (const [b, c] of digitSlots) {
+                    blocks[b][c] = String(Math.floor(Math.random() * 10));
+                }
+
+                const digitSlotSet = new Set(digitSlots.map(([b, c]) => `${b}:${c}`));
+                const uppercaseSlots = shuffle(allPositions.filter(([b, c]) => !digitSlotSet.has(`${b}:${c}`))).slice(0, upperCount);
+
+                for (const [b, c] of uppercaseSlots) {
+                    blocks[b][c] = blocks[b][c].toUpperCase();
+                }
+
+                return blocks.map((block) => block.join("")).join("-");
             }
-            setStatus("Settings reset to defaults.");
-        }
 
-        function showGeneratedPassword() {
-            passwordButton.textContent = generatePassword();
-            setStatus("Click the password to copy it.");
-        }
+            function resetDefaults() {
+                for (const [key, value] of Object.entries(DEFAULTS)) {
+                    inputs[key].value = value;
+                }
+                setStatus("Settings reset to defaults.");
+            }
 
-        async function copyPassword() {
-            await navigator.clipboard.writeText(passwordButton.textContent);
-            setStatus("Copied to clipboard.", true);
-        }
+            function showGeneratedPassword() {
+                passwordText.textContent = generatePassword();
+                setStatus("Click the password to copy it.");
+            }
 
-        generateButton.addEventListener("click", showGeneratedPassword);
-        resetButton.addEventListener("click", resetDefaults);
-        passwordButton.addEventListener("click", copyPassword);
+            async function copyPassword() {
+                await navigator.clipboard.writeText(passwordText.textContent);
+                setStatus("Copied to clipboard.", true);
+            }
 
-        showGeneratedPassword();
-    </script>
-</body>
+            generateButton.addEventListener("click", showGeneratedPassword);
+            resetButton.addEventListener("click", resetDefaults);
+            passwordButton.addEventListener("click", copyPassword);
 
+            showGeneratedPassword();
+        </script>
+    </body>
 </html>
